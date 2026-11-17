@@ -43,6 +43,8 @@ function merge<T extends Record<string, any>>(base: T, over: Record<string, any>
 let cache: Promise<SiteData> | null = null
 
 export function getData(): Promise<SiteData> {
+  // While developing (npm run dev), fetch fresh content on every page load so admin changes show after a refresh.
+  if (import.meta.env.DEV) return load()
   if (!cache) cache = load()
   return cache
 }
