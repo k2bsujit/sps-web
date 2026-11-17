@@ -1,21 +1,21 @@
 # SP Surya website
 
-Fast, SEO-ready website (Astro) with an admin panel (Sanity), hosted on Hostinger.
+Fast, SEO-ready website (Astro) with an admin panel (Sanity), hosted free on **Cloudflare**. The domain stays registered at Hostinger.
 
 ```
 sps-web/
-├── web/      ← the website (Astro). Builds to plain HTML → uploaded to Hostinger
+├── web/      ← the website (Astro) + worker/index.ts (enquiry form) + wrangler.jsonc (Cloudflare settings)
 ├── studio/   ← the admin panel (Sanity Studio) → hosted free at https://spsurya.sanity.studio
-└── .github/workflows/deploy.yml  ← auto build + upload when you publish in the admin
+└── .github/workflows/deploy.yml  ← auto build + publish to Cloudflare when you publish in the admin
 ```
 
-**How it works:** you edit content in the admin → press **Publish** → GitHub rebuilds the site (~1–2 min) → uploads it to Hostinger by FTP. Enquiry-form leads go to **Admin → Leads** and to your email.
+**How it works:** you edit content in the admin → press **Publish** → GitHub rebuilds the site (~1–2 min) → publishes it to Cloudflare. Enquiry-form leads go to **Admin → Leads** (and optionally to your email).
 
 ---
 
-## One-time setup (about 1 hour)
+## One-time setup
 
-You need: [Node.js 22+](https://nodejs.org), a free [GitHub](https://github.com) account, a free [Sanity](https://www.sanity.io) account, and your Hostinger hPanel login.
+You need: [Node.js 22+](https://nodejs.org), free accounts on [GitHub](https://github.com), [Sanity](https://www.sanity.io) and [Cloudflare](https://dash.cloudflare.com/sign-up), and your Hostinger hPanel login (only for the domain).
 
 ### 1. Create the Sanity project (admin database)
 1. Go to <https://www.sanity.io/manage> → **Create new project** → name it *SP Surya* → dataset **production** (public).
@@ -56,30 +56,35 @@ git remote add origin https://github.com/YOUR-USER/sps-web.git
 git push -u origin main
 ```
 
-### 5. Connect GitHub → Hostinger (automatic upload)
-In **hPanel → Files → FTP Accounts**, note the FTP host, username and password (or create a new FTP account limited to `public_html`).
+### 5. Move the domain's DNS to Cloudflare (free; domain stays at Hostinger)
+1. Cloudflare dashboard → **Add a domain** → type your domain → choose the **Free** plan.
+2. Cloudflare copies your existing DNS records. Check that any **MX / email** records are there if you use Hostinger email.
+3. Cloudflare shows **2 nameservers** (like `ana.ns.cloudflare.com`). In **Hostinger hPanel → Domains → your domain → DNS / Nameservers → Change nameservers**, replace Hostinger's with Cloudflare's two.
+4. Wait for the "Your domain is active" email from Cloudflare (usually 15 min–a few hours).
 
-In GitHub → your repo → **Settings → Secrets and variables → Actions**:
+### 6. Connect GitHub → Cloudflare (automatic publishing)
+1. **Cloudflare API token:** dashboard → profile icon → **My Profile → API Tokens → Create Token** → template **Edit Cloudflare Workers** → Account: yours, Zone: your domain → Create → copy it.
+2. **Account ID:** dashboard home → your account → **⋯ → Copy account ID**.
+3. In GitHub → your repo → **Settings → Secrets and variables → Actions**, add:
 
 | Type | Name | Value |
 |---|---|---|
-| Secret | `FTP_SERVER` | e.g. `ftp.spsurya.in` or the IP shown in hPanel |
-| Secret | `FTP_USERNAME` | your FTP username |
-| Secret | `FTP_PASSWORD` | your FTP password |
-| Variable | `PUBLIC_SITE_URL` | `https://www.spsurya.in` |
+| Secret | `CLOUDFLARE_API_TOKEN` | the token from step 1 |
+| Secret | `CLOUDFLARE_ACCOUNT_ID` | the account ID |
+| Variable | `PUBLIC_SITE_URL` | `https://www.your-domain.in` |
 | Variable | `PUBLIC_SANITY_PROJECT_ID` | your Sanity Project ID |
-| Variable (optional) | `FTP_SERVER_DIR` | default `public_html/`. Change it if your FTP account opens inside public_html already (then use `./`) |
 
-Then go to **Actions → Build & deploy to Hostinger → Run workflow**. The first upload takes a few minutes.
+4. GitHub → **Actions → Build & deploy to Cloudflare → Run workflow**. When it's green, the site is live at `https://sps-web.<your-name>.workers.dev`.
+5. **Form settings:** Cloudflare → **Workers & Pages → sps-web → Settings → Variables and Secrets**:
+   - Variable `SANITY_PROJECT_ID` = your Sanity Project ID
+   - Secret `SANITY_TOKEN` = Sanity → manage → **API → Tokens → Add API token** (permission **Editor**)
+6. **Your domain:** same page → **Domains & Routes → Add → Custom domain** → add `www.your-domain.in` **and** `your-domain.in`.
+7. **One address only:** Cloudflare → your domain → **Rules → Redirect Rules → Templates → "Redirect from root to WWW"** → Deploy. Also **SSL/TLS → Edge Certificates → Always Use HTTPS: On**.
+8. Test: submit the form on the live site → it should appear in **Admin → Leads**.
 
-### 6. Hostinger settings
-1. **Domain & SSL:** hPanel → Security → SSL → make sure SSL is **Active** for the domain.
-2. **www or not:** the site uses `https://www.your-domain`. If you prefer no `www`, edit the two lines marked in `web/public/.htaccess` and set `PUBLIC_SITE_URL` without `www`.
-3. **Lead form secrets:** in Sanity → manage → **API → Tokens → Add API token** → name *Website leads*, permission **Editor** → copy it.
-   Then in **hPanel → File Manager**, open the folder that **contains** `public_html` and create a file named `sps-config.php` there with the contents of `web/public/api/config.sample.php`, filled in (project ID, token, your email).
-   ⚠️ Never put this file inside `public_html` or on GitHub.
-4. **Sender email (recommended):** hPanel → Emails → create `no-reply@your-domain` so lead emails don't land in spam.
-5. Test: submit the form on the live site → it should appear in **Admin → Leads** and in your inbox.
+**Optional: email each lead to you.** Only do this if you don't use Hostinger email on this domain, because it changes your MX records. Cloudflare → your domain → **Email → Email Routing** → enable → verify your email. Then remove the `//` in the `send_email` part of `web/wrangler.jsonc`, push, and add the variables `LEAD_EMAIL_TO` (your email) and `LEAD_EMAIL_FROM` (e.g. `no-reply@your-domain.in`).
+
+**Your Hostinger WordPress plan** is no longer needed for the website. Keep it only if you use its email. Don't let the **domain** registration expire.
 
 ### 7. Publish in the admin → site updates automatically
 1. GitHub → your profile → **Settings → Developer settings → Fine-grained tokens → Generate**. Repository access: only `sps-web`. Permissions: **Contents: Read and write**. Copy the token.
@@ -113,7 +118,7 @@ Then go to **Actions → Build & deploy to Hostinger → Run workflow**. The fir
 ## Speed & SEO already built in
 - Plain HTML pages with about 2.5 KB of JavaScript (only for the calculator and form). The home page is about 100 KB in total.
 - Self-hosted fonts (Latin only, plus a 1 KB ₹ file). Images are resized and converted to WebP/AVIF by Sanity's CDN, and load lazily.
-- Clean URLs, HTTPS + www redirect, Brotli/Gzip, long cache headers (`web/public/.htaccess`).
+- Served from Cloudflare's network (fast across India). Clean URLs, HTTPS, Brotli, long cache headers (`web/public/_headers`).
 - Per-page title, description, canonical and share image. Auto `sitemap.xml` + `robots.txt`.
 - Structured data for Google: LocalBusiness (address, hours, areas, services), Service, FAQ, Breadcrumbs, BlogPosting.
 - Separate pages for subsidy, each service, each project, each area and each article. These are what rank in Google, not a single long page.
@@ -122,7 +127,8 @@ Then go to **Actions → Build & deploy to Hostinger → Run workflow**. The fir
 | Folder | Command | What it does |
 |---|---|---|
 | `web` | `npm run dev` | preview the site locally |
-| `web` | `npm run build` | build to `web/dist` (what gets uploaded) |
+| `web` | `npm run build` | build to `web/dist` |
+| `web` | `npm run cf-dev` | test the built site + form on a local Cloudflare runtime |
 | `web` | `npm run make-seed` | rebuild `studio/seed/seed.ndjson` from `src/data/fallback.ts` |
 | `studio` | `npm run dev` | admin locally at http://localhost:3333 |
 | `studio` | `npm run deploy` | publish the admin to *.sanity.studio |

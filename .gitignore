@@ -10,3 +10,4 @@ config.php
 leads-backup.csv
 .DS_Store
 Thumbs.db
+.wrangler/

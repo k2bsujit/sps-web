@@ -1,6 +1,6 @@
 ---
 /**
- * Lead form. Posts to /api/lead.php on Hostinger, which saves the lead in the admin (Sanity)
+ * Lead form. Posts to /api/lead (Cloudflare Worker in worker/index.ts), which saves the lead in the admin (Sanity)
  * and emails you. Works without JavaScript too (normal form post → thank-you page).
  */
 import {telLink} from '../lib/data'
@@ -11,7 +11,7 @@ const s = d.settings
 const from = source || Astro.url.pathname
 ---
 <div data-lead>
-  <form class="form" action="/api/lead.php" method="post" novalidate>
+  <form class="form" action="/api/lead" method="post" novalidate>
     <input type="hidden" name="page" value={from} />
     <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="company" tabindex="-1" autocomplete="off" /></label></div>
     <div class="form-row">

@@ -1,5 +1,0 @@
-# Only lead.php may be called; config files are never served
-<FilesMatch "^(config|config\.sample)\.php$">
-  Require all denied
-</FilesMatch>
-Header set Cache-Control "no-store"

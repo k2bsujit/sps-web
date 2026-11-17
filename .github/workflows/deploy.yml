@@ -1,6 +1,6 @@
-# Builds the website and uploads it to Hostinger.
+# Builds the website and publishes it to Cloudflare.
 # Runs when: you push code, you click "Publish" in the admin (Sanity webhook), you click "Run workflow", or once a day.
-name: Build & deploy to Hostinger
+name: Build & deploy to Cloudflare
 
 on:
   push:
@@ -40,15 +40,8 @@ jobs:
           PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
           PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET || 'production' }}
 
-      - name: Upload to Hostinger
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          local-dir: web/dist/
-          server-dir: ${{ vars.FTP_SERVER_DIR || 'public_html/' }}
-          exclude: |
-            **/.git*
-            **/.git*/**
+      - name: Publish to Cloudflare
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

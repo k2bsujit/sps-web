@@ -1,0 +1,28 @@
+// Cloudflare Workers config: serves web/dist and runs worker/index.ts for the enquiry form.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sps-web",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
+  },
+  "observability": { "enabled": true },
+  "vars": {
+    "SANITY_DATASET": "production"
+    // SANITY_PROJECT_ID, LEAD_EMAIL_TO, LEAD_EMAIL_FROM: set in Cloudflare dashboard → Settings → Variables
+    // SANITY_TOKEN: set as a *Secret* there (never put it in this file)
+  }
+
+  // ---- Optional: email each lead to you (free) ----
+  // 1. Cloudflare dashboard → your domain → Email → Email Routing → enable it and verify your email address.
+  //    (Only do this if you do NOT use Hostinger email on this domain — enabling it changes your MX records.)
+  // 2. Remove the // from the next 3 lines, and set LEAD_EMAIL_TO + LEAD_EMAIL_FROM (e.g. no-reply@your-domain.in).
+  // ,"send_email": [
+  //   { "name": "EMAIL" }
+  // ]
+}

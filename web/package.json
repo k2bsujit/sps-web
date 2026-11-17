@@ -7,12 +7,18 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "make-seed": "node scripts/make-seed.mjs"
+    "make-seed": "node scripts/make-seed.mjs",
+    "deploy": "astro build && wrangler deploy",
+    "cf-dev": "astro build && wrangler dev"
   },
   "dependencies": {
     "@portabletext/to-html": "^6.0.0",
     "@sanity/client": "^7.22.0",
     "@sanity/image-url": "^2.2.0",
     "astro": "^7.4.12"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261117.1",
+    "wrangler": "^4.164.0"
   }
 }
