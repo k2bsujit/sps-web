@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro'
+import PageHero from '../../components/PageHero.astro'
+import Img from '../../components/Img.astro'
+import {getData} from '../../lib/data'
+import {breadcrumbs} from '../../lib/schema'
+
+const d = await getData()
+const crumbs = [{name: 'Home', url: '/'}, {name: 'Solar guide', url: '/blog'}]
+const fmt = (s: string) => new Date(s).toLocaleDateString('en-IN', {day: 'numeric', month: 'short', year: 'numeric'})
+---
+<Base
+  title="Rooftop Solar Guide for Odisha Homes"
+  description="Plain-language guides on PM Surya Ghar subsidy, net metering, system sizing and solar maintenance for homes in Odisha."
+  schema={[breadcrumbs(crumbs, Astro.site!)]}
+  noindex={d.posts.length === 0}
+>
+  <PageHero title="Solar guide" intro="Simple answers about subsidy, net meters, sizing and maintenance — written by our team in Nilagiri." crumbs={crumbs} />
+  <section class="wrap section">
+    {d.posts.length ? (
+      <div class="grid-cards light">
+        {d.posts.map((p: any) => (
+          <a class="svc" href={`/blog/${p.slug}`}>
+            <div class="ph"><Img image={p.cover} width={400} aspect={16 / 10} sizes="(max-width: 640px) 100vw, 400px" /></div>
+            <div class="body">
+              <h2 style="font-size:22px;font-weight:800">{p.title}</h2>
+              <p>{p.excerpt}</p>
+              <p class="price" style="font-weight:600;font-size:14px">{fmt(p.publishedAt)}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="empty">Articles are coming soon.</div>
+    )}
+  </section>
+</Base>

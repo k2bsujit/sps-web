@@ -1,0 +1,70 @@
+---
+import Base from '../layouts/Base.astro'
+import PageHero from '../components/PageHero.astro'
+import Calculator from '../components/Calculator.astro'
+import PortableText from '../components/PortableText.astro'
+import FaqList from '../components/FaqList.astro'
+import EnquiryForm from '../components/EnquiryForm.astro'
+import {getData, inr} from '../lib/data'
+import {breadcrumbs, faqPage} from '../lib/schema'
+
+const d = await getData()
+const sub = d.subsidy
+const rows = sub.rows.map((r: any) => ({...r, total: (r.central || 0) + (r.state || 0)}))
+const max = rows.reduce((m: number, r: any) => Math.max(m, r.total), 0)
+const crumbs = [{name: 'Home', url: '/'}, {name: 'PM Surya Ghar subsidy', url: '/pm-surya-ghar-subsidy-odisha'}]
+const subsidyFaqs = d.faqs.slice(0, 3)
+const steps = d.home.processSteps
+---
+<Base title={sub.pageTitle} seo={sub.seo} schema={[breadcrumbs(crumbs, Astro.site!), faqPage(subsidyFaqs)]}>
+  <PageHero title={sub.pageTitle} intro={sub.pageIntro} crumbs={crumbs} eyebrow={`Up to ${inr(max)} for Odisha homes`} />
+
+  <section class="wrap section two-col">
+    <article class="stack" style="gap:40px">
+      <div class="stack" style="gap:16px">
+        <h2 class="h2" style="font-size:clamp(28px,4vw,38px)">How much subsidy will I get?</h2>
+        <p class="lead">The table shows the combined central + Odisha state subsidy by system size. Systems above 3 kW get the same subsidy as 3 kW.</p>
+        <div class="table-wrap">
+          <table>
+            <caption class="sr-only">Rooftop solar subsidy in Odisha by system size</caption>
+            <thead><tr><th scope="col">System size</th><th scope="col">Central (PM Surya Ghar)</th><th scope="col">Odisha state</th><th scope="col">Total subsidy</th><th scope="col">Units / month</th></tr></thead>
+            <tbody>
+              {rows.map((r: any) => (
+                <tr><th scope="row">{r.label}</th><td>{inr(r.central)}</td><td>{inr(r.state)}</td><td class="total">{inr(r.total)}</td><td>{r.units}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {sub.lastChecked && <p class="muted" style="font-size:14px">Rates last checked on {new Date(sub.lastChecked).toLocaleDateString('en-IN', {day: 'numeric', month: 'long', year: 'numeric'})}. Government rates can change; your exact amount is confirmed at the survey.</p>}
+      </div>
+
+      <div class="stack" style="gap:16px">
+        <h2 class="h2" style="font-size:clamp(28px,4vw,38px)">How to claim it: step by step</h2>
+        <ol class="steps" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+          {steps.map((st: any) => <li><h3>{st.title}</h3><p>{st.text}</p></li>)}
+        </ol>
+      </div>
+
+      <PortableText value={sub.body} />
+
+      <div class="stack" style="gap:16px">
+        <h2 class="h2" style="font-size:clamp(28px,4vw,38px)">Subsidy questions</h2>
+        <FaqList faqs={subsidyFaqs} />
+      </div>
+    </article>
+
+    <aside class="sticky-side">
+      <Calculator data={d} id="side" />
+    </aside>
+  </section>
+
+  <section id="enquiry" class="bg-cream">
+    <div class="wrap section" style="max-width:820px">
+      <div class="stack" style="gap:16px;margin-bottom:24px">
+        <p class="eyebrow">Free home survey</p>
+        <h2 class="h2">Let us check your roof and file your subsidy.</h2>
+      </div>
+      <EnquiryForm data={d} />
+    </div>
+  </section>
+</Base>

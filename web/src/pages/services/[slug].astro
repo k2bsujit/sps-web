@@ -1,0 +1,71 @@
+---
+import Base from '../../layouts/Base.astro'
+import PageHero from '../../components/PageHero.astro'
+import Img from '../../components/Img.astro'
+import Icon from '../../components/Icon.astro'
+import PortableText from '../../components/PortableText.astro'
+import EnquiryForm from '../../components/EnquiryForm.astro'
+import ProjectTiles from '../../components/ProjectTiles.astro'
+import Calculator from '../../components/Calculator.astro'
+import {getData, waLink} from '../../lib/data'
+import {breadcrumbs, service as serviceLd} from '../../lib/schema'
+
+export async function getStaticPaths() {
+  const d = await getData()
+  return d.services.map((sv: any) => ({params: {slug: sv.slug}, props: {slug: sv.slug}}))
+}
+const d = await getData()
+const sv: any = d.services.find((x: any) => x.slug === Astro.props.slug)
+const crumbs = [{name: 'Home', url: '/'}, {name: 'Services', url: '/services'}, {name: sv.title, url: `/services/${sv.slug}`}]
+const catMap: Record<string, string> = {'home-solar': 'Home on-grid', 'hybrid-battery-solar': 'Hybrid / battery', 'commercial-solar': 'Commercial', 'solar-service-amc': 'Service / AMC'}
+const related = d.projects.filter((p: any) => p.category === catMap[sv.slug]).slice(0, 3)
+const others = d.services.filter((x: any) => x.slug !== sv.slug)
+const isHome = /home/.test(sv.slug)
+---
+<Base title={sv.title} description={sv.summary} seo={sv.seo} image={sv.image} schema={[breadcrumbs(crumbs, Astro.site!), serviceLd(sv, d, Astro.site!)]}>
+  <PageHero title={sv.title} intro={sv.summary} crumbs={crumbs}>
+    <div class="btn-row" style="margin-top:8px">
+      <a class="btn btn-orange btn-lg" href="#enquiry">Book a free survey</a>
+      <a class="btn btn-ghost btn-lg" href={waLink(d.settings, `Hello, I want to know about ${sv.title}.`)} rel="noopener">Ask on WhatsApp</a>
+    </div>
+  </PageHero>
+
+  <section class="wrap section two-col">
+    <article class="stack" style="gap:32px">
+      {sv.image?.asset && <Img image={sv.image} width={760} aspect={16 / 9} sizes="(max-width: 960px) 100vw, 760px" class="" priority />}
+      {sv.priceText && <p style="font-family:var(--display);font-size:26px;font-weight:900;color:var(--orange-ink)">{sv.priceText}</p>}
+      {sv.features?.length > 0 && (
+        <ul class="checks" style="font-size:18px;color:var(--navy)">
+          {sv.features.map((f: string) => <li><Icon name="check" size={22} color="#FF6801" stroke={3} />{f}</li>)}
+        </ul>
+      )}
+      <PortableText value={sv.body} />
+      {related.length > 0 && (
+        <div class="stack" style="gap:16px">
+          <h2 class="h2" style="font-size:32px">Recent {sv.title.toLowerCase()} projects</h2>
+          <div class="gallery"><ProjectTiles projects={related} /></div>
+        </div>
+      )}
+    </article>
+    <aside class="sticky-side">
+      {isHome ? <Calculator data={d} id="svc" /> : (
+        <div class="card" style="gap:12px">
+          <h2 style="font-size:22px">Other services</h2>
+          <ul class="stack" style="list-style:none;margin:0;padding:0;gap:8px">
+            {others.map((o: any) => <li><a href={`/services/${o.slug}`}>{o.title} →</a></li>)}
+          </ul>
+        </div>
+      )}
+    </aside>
+  </section>
+
+  <section id="enquiry" class="bg-cream">
+    <div class="wrap section" style="max-width:820px">
+      <div class="stack" style="gap:16px;margin-bottom:24px">
+        <p class="eyebrow">Free site survey</p>
+        <h2 class="h2">Get a written quote for {sv.title.toLowerCase()}.</h2>
+      </div>
+      <EnquiryForm data={d} />
+    </div>
+  </section>
+</Base>

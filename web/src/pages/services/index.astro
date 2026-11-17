@@ -1,0 +1,20 @@
+---
+import Base from '../../layouts/Base.astro'
+import PageHero from '../../components/PageHero.astro'
+import ServiceCards from '../../components/ServiceCards.astro'
+import {getData} from '../../lib/data'
+import {breadcrumbs} from '../../lib/schema'
+
+const d = await getData()
+const crumbs = [{name: 'Home', url: '/'}, {name: 'Services', url: '/services'}]
+---
+<Base
+  title="Rooftop Solar Services in Balasore, Bhadrak & Mayurbhanj"
+  description={`Home solar with subsidy, battery backup, commercial rooftop solar and AMC from ${d.settings.businessName}, ${d.settings.locality}. Free site survey.`}
+  schema={[breadcrumbs(crumbs, Astro.site!)]}
+>
+  <PageHero title={d.home.servicesTitle} intro="Rooftop solar for homes, shops, schools and farms across north Odisha — designed, installed and serviced by one local team." crumbs={crumbs} />
+  <section class="wrap section">
+    <ServiceCards services={d.services} light headingLevel="h2" />
+  </section>
+</Base>

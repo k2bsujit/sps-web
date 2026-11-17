@@ -1,0 +1,12 @@
+---
+import Img from './Img.astro'
+interface Props { projects: any[]; firstBig?: boolean }
+const {projects, firstBig = false} = Astro.props
+const label = (p: any) => [p.sizeKw ? `${p.sizeKw} kW` : null, p.village || p.area?.name].filter(Boolean).join(' · ') || p.title
+---
+{projects.map((p, i) => (
+  <a class:list={['tile', 'reveal', {big: firstBig && i === 0}]} href={`/projects/${p.slug}`}>
+    <Img image={p.mainImage} width={firstBig && i === 0 ? 640 : 400} aspect={1} sizes={firstBig && i === 0 ? '(max-width: 620px) 100vw, 620px' : '(max-width: 620px) 100vw, 300px'} />
+    <span class="cap">{label(p)}</span>
+  </a>
+))}

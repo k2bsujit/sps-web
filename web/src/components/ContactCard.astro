@@ -1,0 +1,19 @@
+---
+import {telLink, waLink, fullAddress} from '../lib/data'
+import type {SiteData} from '../data/fallback'
+interface Props { data: SiteData }
+const s = Astro.props.data.settings
+---
+<div class="talk">
+  <div aria-hidden="true" style="position:absolute;right:-120px;bottom:-120px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(255,104,1,.7) 0%,rgba(255,104,1,0) 65%)"></div>
+  <h3 style="position:relative">Prefer to talk?</h3>
+  <div class="stack" style="gap:10px;position:relative">
+    <a class="btn btn-orange btn-lg" href={telLink(s)}>Call {s.phoneDisplay}</a>
+    <a class="btn btn-ghost btn-lg" href={waLink(s)} rel="noopener">Chat on WhatsApp</a>
+  </div>
+  <div class="info" style="position:relative">
+    <p><b>What happens next</b>We call you, visit your home for free, and give you a written quote with your exact subsidy.</p>
+    <p><b>Office</b>{fullAddress(s)}{s.mapsUrl && <><br /><a href={s.mapsUrl} rel="noopener">Get directions →</a></>}</p>
+    <p><b>Hours</b>{s.hoursText}</p>
+  </div>
+</div>

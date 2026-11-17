@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro'
+import PageHero from '../components/PageHero.astro'
+import FaqList from '../components/FaqList.astro'
+import {getData, waLink, telLink} from '../lib/data'
+import {breadcrumbs, faqPage} from '../lib/schema'
+
+const d = await getData()
+const crumbs = [{name: 'Home', url: '/'}, {name: 'FAQ', url: '/faq'}]
+---
+<Base
+  title="Rooftop Solar & Subsidy FAQ – Odisha"
+  description="Answers on PM Surya Ghar eligibility, subsidy timelines, system size, cyclone safety, EMI and maintenance for rooftop solar in Odisha."
+  schema={[breadcrumbs(crumbs, Astro.site!), faqPage(d.faqs)]}
+>
+  <PageHero title="Frequently asked questions" intro="Everything people ask us before going solar." crumbs={crumbs} />
+  <section class="section" style="max-width:920px;margin:0 auto;padding-inline:24px">
+    <FaqList faqs={d.faqs} />
+    <p style="margin-top:28px" class="lead">Didn't find your answer? <a href={telLink(d.settings)}>Call {d.settings.phoneDisplay}</a> or <a href={waLink(d.settings, 'Hello, I have a question about rooftop solar.')} rel="noopener">ask on WhatsApp</a>.</p>
+  </section>
+</Base>

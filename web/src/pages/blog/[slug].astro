@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro'
+import PageHero from '../../components/PageHero.astro'
+import Img from '../../components/Img.astro'
+import PortableText from '../../components/PortableText.astro'
+import Calculator from '../../components/Calculator.astro'
+import {getData} from '../../lib/data'
+import {breadcrumbs, article} from '../../lib/schema'
+
+export async function getStaticPaths() {
+  const d = await getData()
+  return d.posts.map((p: any) => ({params: {slug: p.slug}, props: {slug: p.slug}}))
+}
+const d = await getData()
+const p: any = d.posts.find((x: any) => x.slug === Astro.props.slug)
+const crumbs = [{name: 'Home', url: '/'}, {name: 'Solar guide', url: '/blog'}, {name: p.title, url: `/blog/${p.slug}`}]
+const date = new Date(p.publishedAt).toLocaleDateString('en-IN', {day: 'numeric', month: 'long', year: 'numeric'})
+const more = d.posts.filter((x: any) => x.slug !== p.slug).slice(0, 3)
+---
+<Base title={p.title} description={p.excerpt} seo={p.seo} image={p.cover} schema={[breadcrumbs(crumbs, Astro.site!), article(p, d, Astro.site!)]}>
+  <PageHero title={p.title} intro={p.excerpt} crumbs={crumbs}>
+    <p class="post-meta"><time datetime={p.publishedAt}>{date}</time> · {d.settings.businessName}</p>
+  </PageHero>
+  <section class="wrap section two-col">
+    <article class="stack" style="gap:28px">
+      {p.cover?.asset && <Img image={p.cover} width={760} aspect={16 / 9} sizes="(max-width: 960px) 100vw, 760px" priority />}
+      <PortableText value={p.body} />
+      {more.length > 0 && (
+        <div class="stack" style="gap:12px;margin-top:24px">
+          <h2 style="font-size:22px">More from the solar guide</h2>
+          <ul class="stack" style="gap:8px;padding-left:1.2em">{more.map((m: any) => <li><a href={`/blog/${m.slug}`}>{m.title}</a></li>)}</ul>
+        </div>
+      )}
+    </article>
+    <aside class="sticky-side"><Calculator data={d} id="post" /></aside>
+  </section>
+</Base>

@@ -1,0 +1,179 @@
+---
+import Base from '../layouts/Base.astro'
+import Icon from '../components/Icon.astro'
+import Img from '../components/Img.astro'
+import Calculator from '../components/Calculator.astro'
+import ServiceCards from '../components/ServiceCards.astro'
+import ProjectTiles from '../components/ProjectTiles.astro'
+import FaqList from '../components/FaqList.astro'
+import EnquiryForm from '../components/EnquiryForm.astro'
+import ContactCard from '../components/ContactCard.astro'
+import {getData, waLink} from '../lib/data'
+
+const d = await getData()
+const h = d.home
+const s = d.settings
+const featured = (d.projects.filter((p: any) => p.featured).length ? d.projects.filter((p: any) => p.featured) : d.projects).slice(0, 5)
+const homeFaqs = d.faqs.filter((f: any) => f.showOnHome !== false).slice(0, 6)
+const areas = s.areasServed || []
+---
+<Base seo={h.seo} image={h.heroImage}>
+  <!-- HERO -->
+  <section class="hero">
+    {h.heroImage?.asset && <Img image={h.heroImage} width={900} aspect={0.9} sizes="58vw" class="hero-photo" alt="" priority />}
+    <div class="hero-sun" aria-hidden="true">
+      <div class="glow"></div>
+      <svg viewBox="0 0 200 200" width="560" height="560" style="position:absolute;inset:0"><g class="rays" stroke="#FFB37A" stroke-width="1.6" stroke-linecap="round" opacity="0.7"><line x1="100" y1="22" x2="100" y2="6" /><line x1="100" y1="178" x2="100" y2="194" /><line x1="22" y1="100" x2="6" y2="100" /><line x1="178" y1="100" x2="194" y2="100" /><line x1="45" y1="45" x2="33" y2="33" /><line x1="155" y1="155" x2="167" y2="167" /><line x1="155" y1="45" x2="167" y2="33" /><line x1="45" y1="155" x2="33" y2="167" /><line x1="70" y1="28" x2="64" y2="13" /><line x1="130" y1="28" x2="136" y2="13" /><line x1="28" y1="70" x2="13" y2="64" /><line x1="172" y1="70" x2="187" y2="64" /><line x1="28" y1="130" x2="13" y2="136" /><line x1="172" y1="130" x2="187" y2="136" /><line x1="70" y1="172" x2="64" y2="187" /><line x1="130" y1="172" x2="136" y2="187" /></g><circle cx="100" cy="100" r="46" fill="#FF6801" /></svg>
+    </div>
+    <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <p class="badge"><span class="dot"></span>{h.heroBadge}</p>
+        <h1>{h.heroTitle} <span class="hl">{h.heroHighlight}</span> {h.heroTitleEnd}</h1>
+        <p class="hero-text">{h.heroText}</p>
+        <div class="btn-row">
+          <a class="btn btn-orange btn-lg" href="#enquiry">{h.primaryCta}<Icon name="arrow" size={18} stroke={2.5} /></a>
+          <a class="btn btn-ghost btn-lg" href="#subsidy">{h.secondaryCta}</a>
+        </div>
+        {s.tagline && <p class="tagline">{s.tagline}</p>}
+      </div>
+      {h.stats?.length > 0 && (
+        <dl class="stats rise rise-3">
+          {h.stats.map((st: any) => (
+            <div class="stat"><dt>{st.label}</dt><dd class:list={{accent: st.accent}}>{st.value}</dd></div>
+          ))}
+        </dl>
+      )}
+    </div>
+  </section>
+
+  <!-- AREAS STRIP -->
+  {areas.length > 0 && (
+    <div class="marquee" role="region" aria-label="Areas we serve">
+      <p class="sr-only">Areas we serve: {areas.join(', ')}</p>
+      <div class="marquee-track" aria-hidden="true">
+        {[...areas, ...areas].map((a) => <><span>{a}</span>✦</>)}
+      </div>
+    </div>
+  )}
+
+  <!-- SUBSIDY -->
+  <section id="subsidy" class="bg-cream">
+    <div class="wrap section split">
+      <div class="stack reveal" style="gap:18px">
+        <p class="eyebrow">Subsidy calculator</p>
+        <h2 class="h2">Odisha homes get two subsidies, not one.</h2>
+        <p class="lead">On top of the central PM Surya Ghar subsidy, the Government of Odisha adds its own. Pick a system size to see what you could receive.</p>
+        <ul class="checks">
+          <li><Icon name="check" size={20} color="#FF6801" stroke={3} />Paid straight to your bank account</li>
+          <li><Icon name="check" size={20} color="#FF6801" stroke={3} />We file the application for you</li>
+          <li><Icon name="check" size={20} color="#FF6801" stroke={3} />Exact amount confirmed at your free survey</li>
+        </ul>
+        <a class="link-arrow" href="/pm-surya-ghar-subsidy-odisha">Read the full subsidy guide →</a>
+      </div>
+      <Calculator data={d} />
+    </div>
+  </section>
+
+  <!-- WHY US -->
+  <section id="why" class="wrap section" style="padding-bottom:56px">
+    <div class="section-head reveal"><div><p class="eyebrow">{h.whyEyebrow}</p><h2 class="h2">{h.whyTitle}</h2></div></div>
+    <div class="grid-cards">
+      {h.whyItems.map((w: any) => (
+        <div class="card reveal">
+          <div class="icon-box"><Icon name={w.icon} size={28} color="#FF6801" /></div>
+          <h3>{w.title}</h3>
+          <p>{w.text}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section class="wrap section" style="padding-top:56px">
+    <div class="section-head reveal"><div><p class="eyebrow">See the difference</p><h2 class="h2">{h.compareTitle}</h2></div></div>
+    <div class="compare">
+      <div class="them reveal">
+        <h3>A typical installer</h3>
+        <ul>{h.compareThem.map((t: string) => <li><Icon name="x" size={22} color="#8A8FA8" stroke={2.6} />{t}</li>)}</ul>
+      </div>
+      <div class="us reveal">
+        <h3>{s.businessName} <span class="pill">Our promise</span></h3>
+        <ul>{h.compareUs.map((t: string) => <li><Icon name="check" size={22} color="#FF6801" stroke={3} />{t}</li>)}</ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services" class="bg-deep on-dark">
+    <div class="wrap section">
+      <div class="section-head reveal">
+        <div><p class="eyebrow">What we install</p><h2 class="h2">{h.servicesTitle}</h2></div>
+        <a href="/services" class="link-arrow">All services →</a>
+      </div>
+      <ServiceCards services={d.services} />
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section id="process" class="wrap section">
+    <div class="section-head reveal"><div><p class="eyebrow">How it works</p><h2 class="h2">{h.processTitle}</h2></div></div>
+    <ol class="steps">
+      {h.processSteps.map((st: any) => <li class="reveal"><h3>{st.title}</h3><p>{st.text}</p></li>)}
+    </ol>
+  </section>
+
+  <!-- GALLERY -->
+  {featured.length > 0 && (
+    <section id="gallery" class="bg-cream">
+      <div class="wrap section">
+        <div class="section-head reveal">
+          <div><p class="eyebrow">Our work</p><h2 class="h2">{h.galleryTitle}</h2></div>
+          <a href="/projects" class="link-arrow">See all projects →</a>
+        </div>
+        <div class="gallery">
+          <ProjectTiles projects={featured} firstBig />
+          {h.fact?.value && (
+            <div class="fact reveal"><span class="k">Odisha fact</span><span class="v">{h.fact.value}</span><span>{h.fact.text}</span><span class="s">{h.fact.source}</span></div>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- REVIEWS -->
+  {d.testimonials.length > 0 && (
+    <section class="wrap section">
+      <div class="section-head reveal"><div><p class="eyebrow">Customer reviews</p><h2 class="h2">What our customers say.</h2></div></div>
+      <div class="grid-cards">
+        {d.testimonials.slice(0, 6).map((t: any) => (
+          <figure class="quote reveal">
+            <span class="stars" aria-label={`${t.rating || 5} out of 5`}>{'★'.repeat(t.rating || 5)}</span>
+            <blockquote>{t.quote}</blockquote>
+            <figcaption>{t.name}<span>{[t.place, t.sizeKw ? `${t.sizeKw} kW system` : null].filter(Boolean).join(' · ')}</span></figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- ENQUIRY -->
+  <section id="enquiry" class="wrap section enquiry">
+    <div class="reveal">
+      <p class="eyebrow">Free home survey</p>
+      <h2 class="h2" style="font-size:clamp(32px,4.6vw,46px)">{h.enquiryTitle}</h2>
+      <EnquiryForm data={d} source="/ (home)" />
+    </div>
+    <div class="reveal"><ContactCard data={d} /></div>
+  </section>
+
+  <!-- FAQ -->
+  {homeFaqs.length > 0 && (
+    <section id="faq" class="bg-mist">
+      <div class="section" style="max-width:920px;margin:0 auto;padding-inline:24px">
+        <div class="section-head reveal" style="margin-bottom:28px"><div><p class="eyebrow">FAQ</p><h2 class="h2">Common questions</h2></div><a class="link-arrow" href="/faq">All questions →</a></div>
+        <FaqList faqs={homeFaqs} />
+        <p style="margin-top:24px" class="muted">Still unsure? <a href={waLink(s, 'Hello, I have a question about rooftop solar.')} rel="noopener">Ask us on WhatsApp</a>.</p>
+      </div>
+    </section>
+  )}
+</Base>

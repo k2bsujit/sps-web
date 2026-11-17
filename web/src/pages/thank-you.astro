@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro'
+import PageHero from '../components/PageHero.astro'
+import {getData, telLink, waLink} from '../lib/data'
+const d = await getData()
+const s = d.settings
+---
+<Base title="Thank you" noindex showCta={false}>
+  <PageHero title="Thank you! We've got your request." intro={`Our team will call you within working hours (${s.hoursText}).`}>
+    <div class="btn-row" style="margin-top:8px">
+      <a class="btn btn-orange btn-lg" href={telLink(s)}>Call {s.phoneDisplay}</a>
+      <a class="btn btn-ghost btn-lg" href={waLink(s)} rel="noopener">WhatsApp us</a>
+      <a class="btn btn-ghost btn-lg" href="/">Back to home</a>
+    </div>
+  </PageHero>
+</Base>

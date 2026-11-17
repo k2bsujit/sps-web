@@ -1,0 +1,27 @@
+---
+import Base from '../../layouts/Base.astro'
+import PageHero from '../../components/PageHero.astro'
+import ProjectTiles from '../../components/ProjectTiles.astro'
+import {getData, waLink} from '../../lib/data'
+import {breadcrumbs} from '../../lib/schema'
+
+const d = await getData()
+const crumbs = [{name: 'Home', url: '/'}, {name: 'Projects', url: '/projects'}]
+---
+<Base
+  title="Our Rooftop Solar Projects in North Odisha"
+  description={`Homes, shops and schools across Balasore, Bhadrak and Mayurbhanj powered by ${d.settings.businessName}. See photos, system sizes and locations.`}
+  schema={[breadcrumbs(crumbs, Astro.site!)]}
+>
+  <PageHero title={d.home.galleryTitle} intro="Real installations by our team — system size, location and photos." crumbs={crumbs} />
+  <section class="wrap section">
+    {d.projects.length ? (
+      <div class="gallery"><ProjectTiles projects={d.projects} /></div>
+    ) : (
+      <div class="empty">
+        <p>Project photos are coming soon.</p>
+        <p style="margin-top:8px"><a href={waLink(d.settings, 'Hello, can I see an installation near me?')} rel="noopener">Ask us to show you an installation near you →</a></p>
+      </div>
+    )}
+  </section>
+</Base>

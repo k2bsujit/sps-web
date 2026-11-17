@@ -1,0 +1,50 @@
+---
+/** Subsidy calculator. Works without JavaScript (shows the default size); JS only swaps numbers. */
+import {inr, waLink} from '../lib/data'
+import type {SiteData} from '../data/fallback'
+interface Props { data: SiteData; id?: string }
+const {data: d, id = 'calc'} = Astro.props
+const rows = d.subsidy.rows.map((r: any) => ({...r, total: (r.central || 0) + (r.state || 0)}))
+const def = Math.max(0, rows.findIndex((r: any) => r.isDefault))
+const cur = rows[def]
+const payload = rows.map((r: any) => ({c: inr(r.central), s: inr(r.state), t: inr(r.total), u: r.units, l: r.label}))
+---
+<div class="calc" data-calc={JSON.stringify(payload)}>
+  <svg viewBox="0 0 200 112" width="300" height="168" aria-hidden="true" style="position:absolute;right:-60px;top:-30px;opacity:.2">
+    <g fill="none" stroke="#FF6801" stroke-width="8" stroke-linecap="round"><path d="M40,100 A60,60 0 0 1 160,100" /><line x1="100" y1="25" x2="100" y2="5" /><line x1="143" y1="38.6" x2="154.5" y2="22.2" /><line x1="57" y1="38.6" x2="45.5" y2="22.2" /><line x1="170.5" y1="74.4" x2="189.3" y2="67.5" /><line x1="29.5" y1="74.4" x2="10.7" y2="67.5" /></g>
+  </svg>
+  <fieldset class="calc-sizes" style="position:relative">
+    <legend>Pick your system size</legend>
+    {rows.map((r: any, i: number) => (
+      <label>
+        <input type="radio" name={`${id}-size`} value={i} checked={i === def} />
+        <span>{r.label}</span>
+      </label>
+    ))}
+  </fieldset>
+  <div class="calc-grid" style="position:relative">
+    <div class="calc-box"><span class="k">Central subsidy</span><span class="v" data-k="c">{inr(cur.central)}</span></div>
+    <div class="calc-box"><span class="k">Odisha state subsidy</span><span class="v" data-k="s">{inr(cur.state)}</span></div>
+  </div>
+  <div class="calc-total" style="position:relative" aria-live="polite">
+    <div class="stack" style="gap:4px"><span class="k">Total subsidy</span><span class="v" data-k="t">{inr(cur.total)}</span></div>
+    <div class="stack" style="gap:4px;text-align:right"><span class="k">Power you make</span><span style="font-size:18px;font-weight:700"><span data-k="u">{cur.units}</span> units / month</span></div>
+  </div>
+  <a class="btn btn-white btn-lg" style="position:relative" href={waLink(d.settings, `Hello ${d.settings.businessName}, I want an exact quote for a rooftop solar system.`)} rel="noopener">Get my exact quote on WhatsApp</a>
+  {d.subsidy.lastChecked && <p class="calc-note" style="position:relative">Rates checked on {new Date(d.subsidy.lastChecked).toLocaleDateString('en-IN', {day: 'numeric', month: 'long', year: 'numeric'})}. Final amount confirmed at your survey.</p>}
+</div>
+
+<script>
+  for (const el of document.querySelectorAll<HTMLElement>('[data-calc]')) {
+    const rows = JSON.parse(el.dataset.calc || '[]')
+    el.addEventListener('change', (e) => {
+      const t = e.target as HTMLInputElement
+      const r = rows[Number(t.value)]
+      if (!r) return
+      for (const k of ['c', 's', 't', 'u']) {
+        const n = el.querySelector(`[data-k="${k}"]`)
+        if (n) n.textContent = r[k]
+      }
+    })
+  }
+</script>

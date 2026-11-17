@@ -1,0 +1,28 @@
+---
+import {toHTML, escapeHTML} from '@portabletext/to-html'
+import {pic} from '../lib/image'
+interface Props { value: any[] | null | undefined }
+const {value} = Astro.props
+const html = value?.length
+  ? toHTML(value, {
+      components: {
+        types: {
+          imageWithAlt: ({value: v}) => {
+            const p = pic(v, {width: 760})
+            if (!p) return ''
+            const cap = v.caption ? `<figcaption>${escapeHTML(v.caption)}</figcaption>` : ''
+            return `<figure><img src="${p.src}" srcset="${p.srcset}" sizes="(max-width: 800px) 100vw, 760px" width="${p.width}" height="${p.height}" alt="${escapeHTML(p.alt)}" loading="lazy" decoding="async">${cap}</figure>`
+          },
+        },
+        marks: {
+          link: ({children, value: v}) => {
+            const href = v?.href || '#'
+            const ext = /^https?:/.test(href)
+            return `<a href="${escapeHTML(href)}"${ext ? ' target="_blank" rel="noopener"' : ''}>${children}</a>`
+          },
+        },
+      },
+    })
+  : ''
+---
+{html && <div class="prose" set:html={html} />}

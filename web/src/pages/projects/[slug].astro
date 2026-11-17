@@ -1,0 +1,50 @@
+---
+import Base from '../../layouts/Base.astro'
+import PageHero from '../../components/PageHero.astro'
+import Img from '../../components/Img.astro'
+import PortableText from '../../components/PortableText.astro'
+import EnquiryForm from '../../components/EnquiryForm.astro'
+import {getData} from '../../lib/data'
+import {breadcrumbs} from '../../lib/schema'
+
+export async function getStaticPaths() {
+  const d = await getData()
+  return d.projects.map((p: any) => ({params: {slug: p.slug}, props: {slug: p.slug}}))
+}
+const d = await getData()
+const p: any = d.projects.find((x: any) => x.slug === Astro.props.slug)
+const crumbs = [{name: 'Home', url: '/'}, {name: 'Projects', url: '/projects'}, {name: p.title, url: `/projects/${p.slug}`}]
+const where = [p.village, p.area?.name].filter(Boolean).join(', ')
+const facts = [
+  p.sizeKw && ['System size', `${p.sizeKw} kW`],
+  p.category && ['Type', p.category],
+  where && ['Location', where],
+  p.completedOn && ['Completed', new Date(p.completedOn).toLocaleDateString('en-IN', {month: 'long', year: 'numeric'})],
+].filter(Boolean) as [string, string][]
+---
+<Base title={p.title} description={p.summary || `${p.title} — rooftop solar by ${d.settings.businessName}.`} seo={p.seo} image={p.mainImage} schema={[breadcrumbs(crumbs, Astro.site!)]}>
+  <PageHero title={p.title} intro={p.summary} crumbs={crumbs} />
+  <section class="wrap section two-col">
+    <article class="stack" style="gap:28px">
+      <Img image={p.mainImage} width={760} sizes="(max-width: 960px) 100vw, 760px" priority />
+      <PortableText value={p.body} />
+      {p.photos?.length > 0 && (
+        <div class="gallery">
+          {p.photos.map((ph: any) => <figure class="tile"><Img image={ph} width={400} aspect={1} sizes="(max-width: 620px) 100vw, 300px" />{ph.caption && <figcaption>{ph.caption}</figcaption>}</figure>)}
+        </div>
+      )}
+    </article>
+    <aside class="sticky-side">
+      <dl class="card" style="gap:10px;margin:0">
+        {facts.map(([k, v]) => <div><dt class="muted" style="font-size:14px">{k}</dt><dd style="margin:0;font-weight:800;font-size:18px">{v}</dd></div>)}
+      </dl>
+      {p.area?.publishPage && <a class="link-arrow" href={`/solar-installation/${p.area.slug}`}>More about solar in {p.area.name} →</a>}
+    </aside>
+  </section>
+  <section id="enquiry" class="bg-cream">
+    <div class="wrap section" style="max-width:820px">
+      <div class="stack" style="gap:16px;margin-bottom:24px"><p class="eyebrow">Want one like this?</p><h2 class="h2">Book a free survey of your roof.</h2></div>
+      <EnquiryForm data={d} />
+    </div>
+  </section>
+</Base>

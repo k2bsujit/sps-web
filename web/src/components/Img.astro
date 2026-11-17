@@ -1,0 +1,36 @@
+---
+/**
+ * Responsive image from Sanity. If no photo has been uploaded yet, shows a neutral placeholder
+ * (so layouts never break) — upload the real photo in the admin to replace it.
+ */
+import {pic} from '../lib/image'
+interface Props {
+  image: any
+  width: number
+  aspect?: number
+  sizes?: string
+  alt?: string
+  class?: string
+  priority?: boolean
+}
+const {image, width, aspect, sizes = '100vw', alt, class: cls, priority = false} = Astro.props
+const p = pic(image, {width, aspect, alt})
+const h = Math.round(width / (aspect || 4 / 3))
+---
+{p ? (
+  <img
+    src={p.src}
+    srcset={p.srcset}
+    sizes={sizes}
+    width={p.width}
+    height={p.height}
+    alt={p.alt}
+    class={cls}
+    loading={priority ? 'eager' : 'lazy'}
+    decoding={priority ? 'sync' : 'async'}
+    fetchpriority={priority ? 'high' : 'auto'}
+    style={p.lqip && !priority ? `background:url(${p.lqip}) center/cover` : undefined}
+  />
+) : (
+  <img src="/images/placeholder.svg" width={width} height={h} alt={alt ?? ''} class={cls} loading="lazy" decoding="async" />
+)}

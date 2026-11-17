@@ -1,0 +1,72 @@
+---
+import Logo from './Logo.astro'
+import type {SiteData} from '../data/fallback'
+import {telLink, waLink, fullAddress, liveAreas} from '../lib/data'
+interface Props { data: SiteData; showCta?: boolean }
+const {data: d, showCta = true} = Astro.props
+const s = d.settings
+const areas = liveAreas(d)
+const year = new Date().getFullYear()
+---
+<footer class="site-footer">
+  <div class="glow" aria-hidden="true"></div>
+  <div class="wrap">
+    {showCta && (
+      <div class="footer-cta">
+        <Logo image={s.logoOnDark || s.logo} name={s.businessName} height={120} dark />
+        <h2>{d.home.ctaTitle}</h2>
+        <div class="btn-row" style="justify-content:center">
+          <a class="btn btn-orange btn-lg" href="/contact#enquiry">Book my free survey</a>
+          <a class="btn btn-ghost btn-lg" href={telLink(s)}>Call {s.phoneDisplay}</a>
+        </div>
+      </div>
+    )}
+    <div class="footer-grid" style={showCta ? undefined : 'margin-top:0;border-top:0;padding-top:56px'}>
+      <div>
+        <h2>Visit us</h2>
+        <address style="font-style:normal">
+          {fullAddress(s)}
+          {s.mapsUrl && <><br /><a href={s.mapsUrl} rel="noopener">Open in Google Maps →</a></>}
+        </address>
+        <p style="margin-top:10px"><a href={telLink(s)}>{s.phoneDisplay}</a> · <a href={waLink(s)} rel="noopener">WhatsApp</a></p>
+        {s.email && <p><a href={`mailto:${s.email}`}>{s.email}</a></p>}
+        <p style="margin-top:10px">{s.hoursText}</p>
+      </div>
+      <div>
+        <h2>Services</h2>
+        <ul>
+          <li><a href="/pm-surya-ghar-subsidy-odisha">PM Surya Ghar subsidy</a></li>
+          {d.services.map((sv: any) => <li><a href={`/services/${sv.slug}`}>{sv.title}</a></li>)}
+        </ul>
+      </div>
+      <div>
+        <h2>Areas we serve</h2>
+        {areas.length ? (
+          <ul>{areas.map((a: any) => <li><a href={`/solar-installation/${a.slug}`}>Solar in {a.name}</a></li>)}</ul>
+        ) : (
+          <p>{(s.areasServed || []).join(', ')} and nearby areas</p>
+        )}
+      </div>
+      <div>
+        <h2>Company</h2>
+        <ul>
+          <li><a href="/projects">Our projects</a></li>
+          {d.posts.length > 0 && <li><a href="/blog">Solar guide</a></li>}
+          <li><a href="/faq">FAQ</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/privacy-policy">Privacy policy</a></li>
+        </ul>
+        {(s.vendorId || s.gstin) && (
+          <p style="margin-top:10px;font-size:13px">
+            {s.vendorId && <>PM Surya Ghar vendor: {s.vendorId}<br /></>}
+            {s.gstin && <>GSTIN: {s.gstin}</>}
+          </p>
+        )}
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© {year} {s.businessName}. {s.footerNote}</p>
+      <p>{s.tagline}</p>
+    </div>
+  </div>
+</footer>

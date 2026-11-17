@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro'
+import PageHero from '../components/PageHero.astro'
+import {getData, fullAddress} from '../lib/data'
+
+const d = await getData()
+const s = d.settings
+---
+<Base title="Privacy policy" description={`How ${s.businessName} uses the details you share with us.`} showCta={false}>
+  <PageHero title="Privacy policy" crumbs={[{name: 'Home', url: '/'}, {name: 'Privacy policy', url: '/privacy-policy'}]} />
+  <section class="wrap section">
+    <div class="prose">
+      <p>This page explains what {s.businessName} does with the information you give us through this website.</p>
+      <h2>What we collect</h2>
+      <p>When you fill in the enquiry form we receive your name, mobile number, village or town, the type of solar you are interested in, your approximate monthly electricity bill and any message you write.</p>
+      <h2>How we use it</h2>
+      <p>We use these details only to contact you about rooftop solar: to arrange a survey, send a quote and help with your subsidy application. We do not sell or share your details with other companies for marketing. Where needed for your subsidy or net meter, we share the required details with the government portal and your electricity distribution company, with your consent.</p>
+      <h2>How long we keep it</h2>
+      <p>We keep enquiry details for as long as needed to serve you and for our business records. You can ask us to delete them at any time.</p>
+      <h2>Your choices</h2>
+      <p>To see, correct or delete your details, call us on {s.phoneDisplay}{s.email && <> or email {s.email}</>}.</p>
+      <h2>Contact</h2>
+      <p>{s.businessName}, {fullAddress(s)}.</p>
+    </div>
+  </section>
+</Base>
