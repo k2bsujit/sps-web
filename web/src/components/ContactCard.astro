@@ -5,7 +5,7 @@ interface Props { data: SiteData }
 const s = Astro.props.data.settings
 ---
 <div class="talk">
-  <div aria-hidden="true" style="position:absolute;right:-120px;bottom:-120px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(255,104,1,.7) 0%,rgba(255,104,1,0) 65%)"></div>
+  <div aria-hidden="true" class="talk-glow"></div>
   <h3 style="position:relative">Prefer to talk?</h3>
   <div class="stack" style="gap:10px;position:relative">
     <a class="btn btn-orange btn-lg" href={telLink(s)}>Call {s.phoneDisplay}</a>
@@ -16,4 +16,92 @@ const s = Astro.props.data.settings
     <p><b>Office</b>{fullAddress(s)}{s.mapsUrl && <><br /><a href={s.mapsUrl} rel="noopener">Get directions →</a></>}</p>
     <p><b>Hours</b>{s.hoursText}</p>
   </div>
+
+  <!-- Animated illustration: sun → panels → house lights up -->
+  <div class="scene" aria-hidden="true">
+    <svg viewBox="0 0 400 220" preserveAspectRatio="xMidYMax meet">
+      <!-- sun -->
+      <g class="sun">
+        <g class="rays" stroke="#FFB37A" stroke-width="3" stroke-linecap="round">
+          <line x1="330" y1="10" x2="330" y2="22" /><line x1="330" y1="78" x2="330" y2="90" />
+          <line x1="290" y1="50" x2="302" y2="50" /><line x1="358" y1="50" x2="370" y2="50" />
+          <line x1="302" y1="22" x2="310" y2="30" /><line x1="350" y1="70" x2="358" y2="78" />
+          <line x1="358" y1="22" x2="350" y2="30" /><line x1="302" y1="78" x2="310" y2="70" />
+        </g>
+        <circle cx="330" cy="50" r="22" fill="#FF6801" />
+      </g>
+      <!-- sunlight beams onto the panels -->
+      <g class="beams" stroke="#FFB37A" stroke-width="2" stroke-linecap="round" fill="none">
+        <path d="M312 66 L222 118" /><path d="M318 72 L252 122" /><path d="M306 60 L192 114" />
+      </g>
+      <!-- ground -->
+      <rect x="0" y="204" width="400" height="16" fill="#1E2A72" />
+      <!-- house -->
+      <rect x="120" y="140" width="150" height="64" fill="#26337A" />
+      <polygon points="108,142 195,104 282,142" fill="#1E2A72" />
+      <!-- panels on roof -->
+      <g class="panels">
+        <polygon points="150,126 182,112 200,120 168,134" fill="#2F4DB8" stroke="#8FA0E8" stroke-width="1" />
+        <polygon points="184,111 216,97 234,105 202,119" fill="#2F4DB8" stroke="#8FA0E8" stroke-width="1" />
+        <polygon points="170,135 202,121 220,129 188,143" fill="#2F4DB8" stroke="#8FA0E8" stroke-width="1" />
+        <polygon points="204,120 236,106 254,114 222,128" fill="#2F4DB8" stroke="#8FA0E8" stroke-width="1" />
+        <rect class="glint" x="140" y="96" width="14" height="60" fill="#FFFFFF" opacity="0.5" transform="skewX(-24)" />
+      </g>
+      <!-- door + windows (light up) -->
+      <rect x="184" y="166" width="22" height="38" rx="2" fill="#0C1240" />
+      <rect class="win" x="138" y="158" width="28" height="22" rx="3" />
+      <rect class="win w2" x="224" y="158" width="28" height="22" rx="3" />
+      <!-- energy flowing from roof to the grid / meter -->
+      <path class="wire" d="M270 150 H330 V204" stroke="#6D78B5" stroke-width="2" fill="none" />
+      <path class="flow" d="M270 150 H330 V204" stroke="#FF6801" stroke-width="3" fill="none" stroke-linecap="round" />
+      <rect x="318" y="176" width="24" height="28" rx="4" fill="#141E5B" stroke="#6D78B5" />
+      <text x="330" y="195" text-anchor="middle" font-size="13" font-weight="800" fill="#FF6801" font-family="Inter Variable, Inter, sans-serif">₹</text>
+      <!-- plants -->
+      <ellipse cx="96" cy="202" rx="20" ry="10" fill="#2F7D5B" />
+      <ellipse cx="300" cy="203" rx="14" ry="8" fill="#2F7D5B" />
+    </svg>
+  </div>
+
+  <ul class="promises">
+    <li>Free survey</li>
+    <li>Written quote</li>
+    <li>Subsidy filed for you</li>
+  </ul>
 </div>
+
+<style>
+  .talk-glow {
+    position: absolute; right: -120px; bottom: -120px; width: 340px; height: 340px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 104, 1, 0.55) 0%, rgba(255, 104, 1, 0) 65%);
+  }
+  .scene { position: relative; margin-top: auto; padding-top: 8px; }
+  .scene svg { width: 100%; height: auto; max-height: 190px; overflow: visible; }
+  .win { fill: #3A4690; }
+  .beams path { stroke-dasharray: 6 10; opacity: 0.8; }
+  .flow { stroke-dasharray: 8 120; stroke-dashoffset: 0; opacity: 0; }
+  .glint { opacity: 0; }
+  .promises { position: relative; list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .promises li { font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: #fff; }
+  .promises li::before { content: '✓ '; color: var(--orange); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .rays { transform-origin: 330px 50px; animation: rays-spin 24s linear infinite; }
+    .sun circle { transform-origin: 330px 50px; animation: sun-pulse 3s ease-in-out infinite; }
+    .beams path { animation: beam 1.2s linear infinite; }
+    .beams path:nth-child(2) { animation-delay: 0.3s; }
+    .beams path:nth-child(3) { animation-delay: 0.6s; }
+    .glint { animation: glint 3.5s ease-in-out infinite; }
+    .flow { opacity: 1; animation: flow 2.2s linear infinite; }
+    .win { animation: lights 3.5s ease-in-out infinite; }
+    .w2 { animation-delay: 0.4s; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .win { fill: #FFB37A; }
+  }
+  @keyframes rays-spin { to { transform: rotate(360deg); } }
+  @keyframes sun-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+  @keyframes beam { to { stroke-dashoffset: -32; } }
+  @keyframes glint { 0% { opacity: 0; transform: skewX(-24deg) translateX(0); } 15% { opacity: 0.5; } 45% { opacity: 0; transform: skewX(-24deg) translateX(150px); } 100% { opacity: 0; transform: skewX(-24deg) translateX(150px); } }
+  @keyframes flow { from { stroke-dashoffset: 128; } to { stroke-dashoffset: 0; } }
+  @keyframes lights { 0%, 30% { fill: #3A4690; } 50%, 85% { fill: #FFB37A; } 100% { fill: #3A4690; } }
+</style>
